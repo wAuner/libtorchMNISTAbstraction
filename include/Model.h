@@ -4,15 +4,16 @@
 #define CAPSTONE_MODEL_H
 
 
-#include "Architecture.h"
+#include "../include/Architecture.h"
 #include <memory>
 #include <string>
 
 class Model {
 private:
-    std::shared_ptr<Architecture> modelArchitecture;
-    torch::optim::Adam optimizer;
-    torch::Device device;
+    std::shared_ptr<Architecture> _modelArchitecture;
+    torch::optim::Adam _optimizer;
+    torch::Device _device;
+    bool _modelTrained = false;
 
 public:
     Model();
@@ -20,6 +21,7 @@ public:
     void test(int batchSize=64, std::string dataDir="./mnist_data", int workers=2);
     void saveModel(std::string filename="model.pt");
     void loadModel(std::string filename = "model.pt");
+    bool isModelTrained() const { return _modelTrained; }
 
 };
 

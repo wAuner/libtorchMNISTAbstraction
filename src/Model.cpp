@@ -20,17 +20,17 @@ void Model::train(int64_t epochs, int batchSize, std::string dataDir, int worker
         int correct = 0;
         int64_t batchIndex = 0;
         for (torch::data::Example<>& batch : *dataloader) {
-            torch::Tensor x_train = batch.data.to(device);
-            torch::Tensor y_train = batch.target.to(device);
-            optimizer.zero_grad();
+            torch::Tensor x_train = batch.data.to(_device);
+            torch::Tensor y_train = batch.target.to(_device);
+            _optimizer.zero_grad();
 
-            torch::Tensor output = modelArchitecture->forward(x_train);
+            torch::Tensor output = _modelArchitecture->forward(x_train);
             torch::Tensor loss = torch::nll_loss(output, y_train);
             torch::Tensor prediction = output.argmax(1);
             correct += prediction.eq(y_train).sum().item<int>();
 
             loss.backward();
-            optimizer.step();
+            _optimizer.step();
 
             if (batchIndex % 100 == 0) {
                 std::cout << "\rTraining epoch: " << epoch << "\tcurrent training loss: " << loss.item<float>()<< std::flush;
@@ -41,7 +41,7 @@ void Model::train(int64_t epochs, int batchSize, std::string dataDir, int worker
 
     }
     std::cout << std::endl;
-
+    _modelTrained = true;
 
 }
 
@@ -59,10 +59,10 @@ void Model::test(int batchSize, std::string dataDir, int workers) {
     int correct = 0;
     std::cout << "Start testing on test set..." << std::endl;
     for (torch::data::Example<>& batch : *dataloader) {
-        torch::Tensor x_test = batch.data.to(device);
-        torch::Tensor y_test = batch.target.to(device);
+        torch::Tensor x_test = batch.data.to(_device);
+        torch::Tensor y_test = batch.target.to(_device);
 
-        torch::Tensor output = modelArchitecture->forward(x_test);
+        torch::Tensor output = _modelArchitecture->forward(x_test);
         torch::Tensor predictions = output.argmax(1);
         correct += predictions.eq(y_test).sum().item<int>();
     }
@@ -71,24 +71,25 @@ void Model::test(int batchSize, std::string dataDir, int workers) {
 }
 
 // constructor
-Model::Model() : modelArchitecture(std::make_shared<Architecture>()),
-                 optimizer(modelArchitecture->parameters(), torch::optim::AdamOptions(1e-5)),
-                 device(torch::kCPU) {
+Model::Model() : _modelArchitecture(std::make_shared<Architecture>()),
+                 _optimizer(_modelArchitecture->parameters(), torch::optim::AdamOptions(1e-5)),
+                 _device(torch::kCPU) {
     if (torch::cuda::is_available()) {
         std::cout << "CUDA GPU is available, switching to GPU mode." << std::endl;
-        device = torch::kCUDA;
-        modelArchitecture->to(device);
+        _device = torch::kCUDA;
+        _modelArchitecture->to(_device);
     }
 }
 
 void Model::saveModel(std::string filename) {
     std::cout << "Saving model..." << std::endl;
-    torch::save(modelArchitecture, filename);
+    torch::save(_modelArchitecture, filename);
 }
 
 void Model::loadModel(std::string filename) {
     std::cout << "Loading model..." << std::endl;
-    torch::load(modelArchitecture, filename);
+    torch::load(_modelArchitecture, filename);
     std::cout << "Loaded model successful." << std::endl;
+    _modelTrained = true;
 }
 
