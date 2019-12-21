@@ -6,8 +6,9 @@ tasks for a specific use case. Supports GPU and CPU training / inference.
 There is also an interactive commandline app that lets you control these actions via terminal.
 
 ## Dependencies / prerequisites
-* [libtorch](https://pytorch.org/get-started/locally/) 
-    * GPU or CPU, for GPU Cuda 10.1 and cudnn is required
+* [libtorch](https://pytorch.org/get-started/locally/)
+   * prebuild binary download available. just download and use the `CMAKE_PREFIX_PATH`option
+   * GPU or CPU, for GPU Cuda 10.1 and cudnn is required
 * a compiler with OpenMP like g++ (clang on mac does not come with OpenMP)
 * the mnist dataset can be downloaded using the script. `python mnist_download.py`
     * the dataset **must** be located or linked to the same directory as the binary e.g. execute the download command from `build`
@@ -15,8 +16,36 @@ There is also an interactive commandline app that lets you control these actions
 ## Build instructions
 From the project directory:
 * `mkdir build && cd build`
-* download dataset `python mnist_download.py`
-* to build the project: 
+* prepare dataset:
+   * `mkdir mnist_data && cd mnist_data`
+   * download and extract dataset `python ../../mnist_download.py`
+   * return to build dir `cd ..`
+The project structure should now look like this:
+```
+.
+|-- build
+|   `-- mnist_data
+|       |-- t10k-images-idx3-ubyte
+|       |-- t10k-images-idx3-ubyte.gz
+|       |-- t10k-labels-idx1-ubyte
+|       |-- t10k-labels-idx1-ubyte.gz
+|       |-- train-images-idx3-ubyte
+|       |-- train-images-idx3-ubyte.gz
+|       |-- train-labels-idx1-ubyte
+|       `-- train-labels-idx1-ubyte.gz
+|-- CMakeLists.txt
+|-- include
+|   |-- Architecture.h
+|   `-- Model.h
+|-- mnist_download.py
+|-- README.md
+`-- src
+    |-- Architecture.cpp
+    |-- main.cpp
+    `-- Model.cpp
+```
+  
+* to build the project from build dir: 
    * `cmake -DCMAKE_PREFIX_PATH=/path/to/libtorch ..` followed by 
    * `make`
 * execute `./Capstone`
