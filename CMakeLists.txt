@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(Capstone)
 
-list(APPEND CMAKE_PREFIX_PATH "~/lib/gpu_torch/libtorch")
+
 find_package(Torch REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
